@@ -2,7 +2,7 @@
 % Please edit documentation in R/xglue.R
 \name{xglue}
 \alias{xglue}
-\title{Perform xglue}
+\title{Perform xglue operation on a template text}
 \usage{
 xglue(
   txt,
@@ -14,7 +14,7 @@ xglue(
 )
 }
 \arguments{
-\item{txt}{The string on which xglue operations shall be performed}
+\item{txt}{The template text on which xglue operations shall be performed}
 
 \item{envir}{Environment or list that contains objects whose value is spliced in. By default the environment from which xglue is called.}
 
@@ -30,5 +30,5 @@ xglue(
 The glued text as a single character
 }
 \description{
-Perform xglue
+Perform xglue operation on a template text
 }
