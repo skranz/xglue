@@ -9,7 +9,6 @@ examples.xglue = function() {
   modes = unique(dat$mode)
   options(warn=1)
   restore.point.options(display.restore.point = TRUE)
-  undebug(glue.all.with.parent)
   res = xglue(txt, open="<<", close=">>")
 
   writeLines(res, "test_table.tex")
