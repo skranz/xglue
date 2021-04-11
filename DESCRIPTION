@@ -1,0 +1,14 @@
+Package: xglue
+Type: Package
+Title: Extended glue. Write collapse and by Uses a template file with a special syntax.
+Version: 0.1.0
+Author: Sebastian Kranz
+Maintainer: Sebastian Kranz <sebastian.kranz@uni-ulm.de>
+Description: Extended glue.
+        Add in the string to be glued blocks that specify collapse operations on vectors,
+        and allow to operate on a grouped data frame
+License: GPL (>=2.0)
+Encoding: UTF-8
+LazyData: true
+Depends: glue,rmdtools, dplyr, data.table
+RoxygenNote: 7.1.1
