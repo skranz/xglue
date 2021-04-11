@@ -1,28 +1,4 @@
-examples.xglue = function() {
-  setwd("C:/research/comment_phack")
-  library(rmdtools)
-  dat = readRDS("deround_binom.Rds")
 
-
-  dat = filter(dat, method=="ALL", mode %in% c("reported","omit"), h %in% c(0.1,0.2))
-  txt = readLines("tab_binom_glue.tex")
-  modes = unique(dat$mode)
-  options(warn=1)
-  restore.point.options(display.restore.point = TRUE)
-  res = xglue(txt, open="<<", close=">>")
-
-  writeLines(res, "test_table.tex")
-
-  res$glued[[3]]
-
-  df = data.frame(a=rep(0:1, length=100),b=rep(0:2, length=100),c=1:100)
-  fun = function(mydat,...) {
-    restore.point("fun")
-    mydat$d = mydat$b*mydat$c
-    mydat
-  }
-  res = do.by(df, fun, by=c("a","b"), "data")
-}
 
 
 #' Perform xglue operation on a template text
