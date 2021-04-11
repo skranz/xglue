@@ -8,6 +8,8 @@ examples.xglue = function() {
   txt = readLines("tab_binom_glue.tex")
   modes = unique(dat$mode)
   options(warn=1)
+  restore.point.options(display.restore.point = TRUE)
+  undebug(glue.all.with.parent)
   res = xglue(txt, open="<<", close=">>")
 
   writeLines(res, "test_table.tex")
@@ -22,6 +24,7 @@ examples.xglue = function() {
   }
   res = do.by(df, fun, by=c("a","b"), "data")
 }
+
 
 #' Perform xglue operation on a template text
 #'
@@ -46,18 +49,6 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.fr
     env = new.env(envir)
   }
 
-  xglue.by.placeholder = function(ph.dat, dat.var, by) {
-    by.vals =
-    dat$str
-  }
-  environment(xglue.by.placeholder) = env
-
-
-  dat.vars = unique(unlist(strsplit(bdf$with,",",fixed=TRUE))) %>% na.omit
-  for (dat.var in dat.vars) {
-
-  }
-
 
   if (is.null(envir[["newline"]]))
     env$newline = "\n"
@@ -74,88 +65,99 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.fr
   }
   if (length(sep.rows)>0) bdf = bdf[-sep.rows,]
 
-  bdf$glued = vector("list", NROW(bdf))
+  edit = as.environment(
+    list(txt=txt, txt.sep=txt.sep, cur.env=env, open=open, close=close, num.txt.change = 0)
+  )
 
+  #undebug(glue.all.with.parent)
+  #debug(glue.collapse.block)
+  glue.all.with.parent(0,edit, bdf)
 
-  xglue.one.obs = function(row) {
-    restore.point("xglue.one.obs")
-    # No data set
-    dat.name = bdf$with[row]
-    lines = (bdf$start[row]+1):(bdf$end[row]-1)
-    txt.sep[max(lines)] = ""
-    content = paste0(txt[lines], txt.sep[lines], collapse="")
-    if (is.na(dat.name)) {
-      str = glue(content,.envir=env, .open=open, .close=close, .trim=FALSE) %>%
-        paste0(collapse=bdf$collapse[row])
-      return(str)
-    }
+  content = paste0(edit$txt, edit$txt.sep, collapse="")
+  str = glue(content,.envir=env, .open=edit$open, .close=edit$close, .trim=FALSE)
 
-    dat = get(dat.name, envir)
-
-    parent.by = bdf$parent.by[row]
-    by = bdf$by[row]
-    collapse = bdf$collapse[row]
-    glue.fun = function(df) {
-      restore.point("glue.fun")
-      glue_data(df,content,.envir=env, .open=open, .close=close, .trim=FALSE) %>%
-        paste0(collapse=collapse)
-    }
-
-    if (is.na(parent.by) & is.na(by)) {
-      str = glue_fun(dat)
-      return(str)
-    } else if (!is.na(parent.by) & is.na(by)) {
-      parent.by.vec = strsplit(parent.by,",",fixed = TRUE)[[1]]
-      str = do.by(dat,glue.fun, by=parent.by.vec)
-      return(str)
-    } else if (is.na(parent.by) & !is.na(by)) {
-      restore.point("jslkflksfjdkjfh")
-      by.vec = strsplit(by,",",fixed = TRUE)[[1]]
-      str = do.by(dat,glue.fun, by=by.vec)
-      str = paste0(str, collapse=collapse)
-      return(str)
-    } else {
-      stop("by and parent.by together not yet implemented.")
-    }
-  }
-
-  levels = sort(unique(bdf$level))
-  lev = max(levels)
-  for (lev in rev(levels)) {
-    rows = which(bdf$level==lev)
-    row = first(rows)
-    for (row in rows) {
-      # Evaluate block content
-      res = xglue.one.obs(row)
-      str = unlist(res)
-      bdf$glued[[row]] = str
-
-      # Replace txt in block with str
-      # and adapt txt.sep
-      start = bdf$start[row]; end = bdf$end[row]
-      txt[start:end] = ""
-      txt.sep[start:end] = ""
-      if (length(res)==1) {
-        txt[start] = str
-      } else {
-        ph.id = paste0("._pLaCeh0Ld_", row)
-        env[[ph.id]] = str
-        ph.code = paste0("xglue.by.placeholder(", ph.id,")")
-        txt[start] = paste0(open,ph.id,close)
-      }
-      if (start > 1) txt.sep[start-1] = ""
-    }
-  }
-
-  str = paste0(txt, txt.sep, collapse="")
-  res.str = glue(str,.envir=env, .open=open, .close=close, .trim=FALSE)
-
-  #if (return.bdf)
-  #  return(list(str=res.str, bdf=bdf))
-
-  return(res.str)
+  return(str)
 }
 
+
+glue.all.with.parent = function(parent = 0, edit,bdf) {
+  restore.point("glue.all.with.parent")
+  rows = which(bdf$parent == parent)
+
+  for (row in rows) {
+    type = bdf$type[row]
+    if (type=="with") {
+      glue.with.block(row, edit, bdf)
+    } else if (type=="collapse") {
+      glue.collapse.block(row, edit, bdf)
+    } else {
+      stop(paste0("Unknown block type ", type))
+    }
+  }
+}
+
+
+glue.with.block = function(row, edit, bdf) {
+  restore.point("glue.with.block")
+  org.edit = edit
+  by.vars = strsplit(bdf$by[row],",",fixed=TRUE)[[1]] %>% trimws()
+  dat.name = bdf$with[[row]]
+  dat = get(dat.name, org.edit$cur.env)
+  split.li = split.by(dat,by.vars)
+
+  str.li = rep("",length(split.li))
+
+  # Get glue results for all splits
+  for (si in seq_along(split.li)) {
+    edit = as.environment(as.list(org.edit))
+    edit$cur.env = new.env(parent=org.edit$cur.env)
+    edit$cur.env[[dat.name]] = split.li[[si]]
+
+    str.li[si] = glue.collapse.block(row,edit, bdf)
+  }
+  str = paste0(str.li, collapse=bdf$collapse[row])
+  edit = org.edit
+  replace.block.edit.txt(str,row,edit,bdf)
+  invisible(str)
+}
+
+glue.collapse.block = function(row, edit, bdf) {
+  restore.point("glue.collapse.block")
+
+  # xglue children
+  glue.all.with.parent(row, edit, bdf)
+
+  dat.name = bdf$with[row]
+  content = get.block.content(row, edit, bdf)
+
+  if (is.na(dat.name)) {
+    str = glue(content,.envir=edit$cur.env, .open=edit$open, .close=edit$close, .trim=FALSE)
+  } else {
+    df = get(dat.name, edit$cur.env)
+    str = glue_data(df,content,.envir=edit$cur.env, .open=edit$open, .close=edit$close, .trim=FALSE)
+  }
+  str = paste0(str, collapse=bdf$collapse[row])
+  replace.block.edit.txt(str,row,edit,bdf)
+  invisible(str)
+}
+
+
+get.block.content = function(row, edit, bdf) {
+  start = bdf$start[row]; end = bdf$end[row]
+  lines = (start+1):(end-1)
+  edit$txt.sep[max(lines)] = ""
+  content = paste0(edit$txt[lines], edit$txt.sep[lines], collapse="")
+  content
+}
+
+replace.block.edit.txt = function(str,row, edit, bdf) {
+  start = bdf$start[row]; end = bdf$end[row]
+  edit$txt[start:end] = ""
+  edit$txt.sep[start:end] = ""
+  edit$txt[start] = str
+  edit$num.txt.change = edit$num.txt.change +1
+  invisible(edit)
+}
 
 parse.xglue.blocks = function(txt) {
   bdf = rmdtools::find.rmd.nested(txt) %>% filter(form=="block")
@@ -203,7 +205,6 @@ parse.xglue.blocks = function(txt) {
 }
 
 extract.block.args.str = function(args, types=c("with","by","collapse")) {
-  restore.point("jsfkjdlf")
   res = rep(NA_character_, length(types))
   names(res) = types
   args = trimws(args)

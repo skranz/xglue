@@ -1,3 +1,9 @@
+split.by = function(df, by) {
+  dt = as.data.table(df)
+  split.li = split(dt,by=by)
+  split.li
+}
+
 do.by = function(df,fun, by) {
   library(data.table)
   dt = as.data.table(df)
