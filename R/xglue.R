@@ -171,7 +171,7 @@ parse.xglue.blocks = function(txt) {
   levels = sort(unique(bdf$level))
 
   bdf$parent.by = ""
-  bdf$by = ifelse(is.na(bdf$group_by), bdf$subgroup_by,bdf$group_by)
+  bdf$by = bdf$group_by
   for (lev in setdiff(levels, min(levels))) {
     rows = bdf$level == lev
     prows = bdf$parent[rows]
@@ -191,7 +191,7 @@ parse.xglue.blocks = function(txt) {
 ]
 }
 
-extract.block.args.str = function(args, types=c("use","group_by","subgroup_by", "collapse")) {
+extract.block.args.str = function(args, types=c("use","group_by", "collapse")) {
   res = rep(NA_character_, length(types))
   names(res) = types
   args = trimws(args)

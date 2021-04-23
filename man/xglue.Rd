@@ -9,8 +9,7 @@ xglue(
   envir = parent.frame(),
   open = "{",
   close = "}",
-  enclos = parent.frame(),
-  bdf = parse.xglue.blocks(txt)
+  enclos = parent.frame()
 )
 }
 \arguments{
@@ -23,8 +22,6 @@ xglue(
 \item{close}{the closing string of glue whiskers}
 
 \item{enclos}{If envir is a list the enclosing environment.}
-
-\item{bdf}{the result of a manual call of parse.xglue.blocks. Don't need to change this parameter, may only be helpful for speeding things up if the same txt shall be glued with different with values.}
 }
 \value{
 The glued text as a single character
