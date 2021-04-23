@@ -1,6 +1,3 @@
-
-
-
 #' Perform xglue operation on a template text
 #'
 #' @param txt The template text on which xglue operations shall be performed
@@ -8,13 +5,22 @@
 #' @param open the opening string of glue whiskers
 #' @param close the closing string of glue whiskers
 #' @param enclos If envir is a list the enclosing environment.
-#' @param bdf the result of a manual call of parse.xglue.blocks. Don't need to change this parameter, may only be helpful for speeding things up if the same txt shall be glued with different with values.
-#'
 #' @returns The glued text as a single character
 #' @export
-xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.frame(), bdf = parse.xglue.blocks(txt)) {
+xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.frame()) {
   restore.point("xglue")
   txt = sep.lines(txt)
+
+  # Remove ignore blocks
+  ibdf = rmdtools::find.rmd.nested(txt) %>% filter(type=="ignore")
+  if (NROW(ibdf)>0) {
+    remove.lines = unlist(lapply(1:NROW(ibdf), function(i) {
+      ibdf$start:ibdf$end
+    }))
+    txt = txt[-remove.lines]
+  }
+
+  bdf = parse.xglue.blocks(txt)
 
   if (is.list(envir)) {
     envir = as.environment(envir)
@@ -61,8 +67,8 @@ glue.all.with.parent = function(parent = 0, edit,bdf) {
 
   for (row in rows) {
     type = bdf$type[row]
-    if (type=="with") {
-      glue.with.block(row, edit, bdf)
+    if (type=="use") {
+      glue.use.block(row, edit, bdf)
     } else if (type=="collapse") {
       glue.collapse.block(row, edit, bdf)
     } else {
@@ -72,12 +78,16 @@ glue.all.with.parent = function(parent = 0, edit,bdf) {
 }
 
 
-glue.with.block = function(row, edit, bdf) {
-  restore.point("glue.with.block")
+glue.use.block = function(row, edit, bdf) {
+  restore.point("glue.use.block")
   org.edit = edit
   by.vars = strsplit(bdf$by[row],",",fixed=TRUE)[[1]] %>% trimws()
-  dat.name = bdf$with[[row]]
-  dat = get(dat.name, org.edit$cur.env)
+  dat.name = bdf$use[[row]]
+  dat = try(get(dat.name, org.edit$cur.env))
+  if (!is.data.frame(dat)) {
+    stop(paste0("I did not find a data frame with name ", dat.name, " that you specify in your use block."))
+  }
+
   split.li = split.by(dat,by.vars)
 
   str.li = rep("",length(split.li))
@@ -86,8 +96,8 @@ glue.with.block = function(row, edit, bdf) {
   for (si in seq_along(split.li)) {
     edit = as.environment(as.list(org.edit))
     edit$cur.env = new.env(parent=org.edit$cur.env)
-    edit$cur.env[[dat.name]] = split.li[[si]]
-
+    edit$cur.env[[".DATA"]] = as.data.frame(split.li[[si]])
+    #edit$cur.env[[dat.name]] = split.li[[si]]
     str.li[si] = glue.collapse.block(row,edit, bdf)
   }
   str = paste0(str.li, collapse=bdf$collapse[row])
@@ -102,13 +112,13 @@ glue.collapse.block = function(row, edit, bdf) {
   # xglue children
   glue.all.with.parent(row, edit, bdf)
 
-  dat.name = bdf$with[row]
+  dat.name = bdf$use[row]
   content = get.block.content(row, edit, bdf)
 
   if (is.na(dat.name)) {
     str = glue(content,.envir=edit$cur.env, .open=edit$open, .close=edit$close, .trim=FALSE)
   } else {
-    df = get(dat.name, edit$cur.env)
+    df = get(".DATA", edit$cur.env)
     str = glue_data(df,content,.envir=edit$cur.env, .open=edit$open, .close=edit$close, .trim=FALSE)
   }
   str = paste0(str, collapse=bdf$collapse[row])
@@ -135,13 +145,14 @@ replace.block.edit.txt = function(str,row, edit, bdf) {
 }
 
 parse.xglue.blocks = function(txt) {
+  restore.point("parse.xglue.blocks")
+  txt = sep.lines(txt)
   bdf = rmdtools::find.rmd.nested(txt) %>% filter(form=="block")
+
   bdf = bdf %>%
     mutate(head = paste0(type," ", arg.str))
 
   arg.li = strsplit(bdf$head,";")
-  i = 3
-  args = arg.li[[3]]
   arg.mat = do.call(rbind,lapply(arg.li, function(args) {
     extract.block.args.str(args)
   }))
@@ -160,6 +171,7 @@ parse.xglue.blocks = function(txt) {
   levels = sort(unique(bdf$level))
 
   bdf$parent.by = ""
+  bdf$by = ifelse(is.na(bdf$group_by), bdf$subgroup_by,bdf$group_by)
   for (lev in setdiff(levels, min(levels))) {
     rows = bdf$level == lev
     prows = bdf$parent[rows]
@@ -168,18 +180,18 @@ parse.xglue.blocks = function(txt) {
     comma = ifelse(ppby=="" | pby=="","",",")
 
     bdf$parent.by[rows] = paste0(ppby,comma, pby)
-    bdf$with[rows] = ifelse(is.na(bdf$with[rows]), bdf$with[prows], bdf$with[rows])
+    bdf$use[rows] = ifelse(is.na(bdf$use[rows]), bdf$use[prows], bdf$use[rows])
   }
 
   bdf$parent.by = ifelse(bdf$parent.by=="", NA, bdf$parent.by)
 
   bdf$content = get.blocks.txt(txt, bdf, inner=TRUE)
 
-  bdf[,c("start", "end", "type","form", "level", "parent", "head", "with", "by", "collapse", "parent.by","content")
+  bdf[,c("start", "end", "type","form", "level", "parent", "head", "use", "by", "collapse", "parent.by","content")
 ]
 }
 
-extract.block.args.str = function(args, types=c("with","by","collapse")) {
+extract.block.args.str = function(args, types=c("use","group_by","subgroup_by", "collapse")) {
   res = rep(NA_character_, length(types))
   names(res) = types
   args = trimws(args)
