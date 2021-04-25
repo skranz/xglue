@@ -1,0 +1,7 @@
+Hello 
+#< collapse ", "
+{names}
+#>
+!
+
+Greetings, {myname}

@@ -4,15 +4,18 @@
 #' @param envir Environment or list that contains objects whose value is spliced in. By default the environment from which xglue is called.
 #' @param open the opening string of glue whiskers
 #' @param close the closing string of glue whiskers
+#' @param pre.open the opening string of glue whiskers when pre compiling pre blocks
+#' @param pre.close the closing string of glue whiskers when pre compiling pre blocks
 #' @param enclos If envir is a list the enclosing environment.
 #' @returns The glued text as a single character
 #' @export
-xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.frame()) {
+xglue = function(txt, envir=parent.frame(),open="{", close="}",pre.open="<<", pre.close=">>", enclos=parent.frame(), newline = "<<newline>>") {
   restore.point("xglue")
   txt = sep.lines(txt)
 
   # Remove ignore blocks
-  ibdf = rmdtools::find.rmd.nested(txt) %>% filter(type=="ignore")
+  bdf = rmdtools::find.rmd.nested(txt)
+  ibdf = bdf %>% filter(type=="ignore")
   if (NROW(ibdf)>0) {
     remove.lines = unlist(lapply(1:NROW(ibdf), function(i) {
       ibdf$start:ibdf$end
@@ -20,19 +23,27 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.fr
     txt = txt[-remove.lines]
   }
 
-  bdf = parse.xglue.blocks(txt)
+  # Compile pre blocks
+  txt = xglue.pre(txt,envir, open=pre.open, close=pre.close, enclos=enclos,bdf=bdf, newline=newline)
 
+  bdf = parse.xglue.blocks(txt, newline=newline)
+  
+  
   if (is.list(envir)) {
     envir = as.environment(envir)
     parent.env(envir) = enclos
     env = envir
   } else {
-    env = new.env(envir)
+    env = new.env(parent=envir)
   }
 
+  if (is.null(bdf)) {
+    str = glue(txt,.envir=env, .open=open, .close=close, .trim=FALSE)
+    return(str)
+  }
 
-  if (is.null(envir[["newline"]]))
-    env$newline = "\n"
+  #if (is.null(envir[["newline"]]))
+  #  env$newline = "\n"
 
   txt.sep = rep("\n", length(txt))
   txt.sep[length(txt)] = ""
@@ -49,15 +60,51 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}", enclos=parent.fr
   edit = as.environment(
     list(txt=txt, txt.sep=txt.sep, cur.env=env, open=open, close=close, num.txt.change = 0)
   )
-
-  #undebug(glue.all.with.parent)
-  #debug(glue.collapse.block)
   glue.all.with.parent(0,edit, bdf)
 
   content = paste0(edit$txt, edit$txt.sep, collapse="")
+
   str = glue(content,.envir=env, .open=edit$open, .close=edit$close, .trim=FALSE)
 
   return(str)
+}
+
+#' Just compile pre blocks and return resulting text
+#'
+#' @param txt The template text on which xglue operations shall be performed
+#' @param envir Environment or list that contains objects whose value is spliced in. By default the environment from which xglue is called.
+#' @param open the opening string of the to be replaced glue whiskers in pre block
+#' @param close the closing string of the to be replaced glue whiskers in pre block
+#' @param enclos If envir is a list the enclosing environment.
+#' @returns The resulting text of the template were pre blocks have been replaced
+#' @export
+xglue.pre = function(txt, envir=parent.frame(),open="<<", close=">>", enclos=parent.frame(), newline="<<newline>>", bdf=NULL) {
+  restore.point("xlgue.pre")
+  if (is.null(bdf))
+    bdf = rmdtools::find.rmd.nested(txt)
+
+  pre.bdf = bdf %>% filter(type=="pre")
+  if (NROW(pre.bdf)==0) return(txt)
+  ignore.lines = NULL
+  for (i in 1:NROW(pre.bdf)) {
+    start = pre.bdf$start[i];
+    end = pre.bdf$end[i]
+    pre.txt = txt[(start+1):(end-1)]
+    ignore.lines = c(ignore.lines, start:end)
+
+    str = xglue(pre.txt, envir=envir, open=open, close=close, enclos=enclos, newline=newline)
+
+    txt[start:end] = ""
+    line = pmax(start-1,1)
+    txt[line] = paste0(txt[line],paste0(str, collapse = "\n"))
+    txt
+  }
+  ignore.lines = setdiff(ignore.lines, 1)
+  if (length(ignore.lines)>0) {
+    txt = txt[-ignore.lines]
+  }
+
+  txt
 }
 
 
@@ -138,17 +185,18 @@ get.block.content = function(row, edit, bdf) {
 replace.block.edit.txt = function(str,row, edit, bdf) {
   start = bdf$start[row]; end = bdf$end[row]
   edit$txt[start:end] = ""
-  edit$txt.sep[start:end] = ""
+  edit$txt.sep[pmax(start-1,1):end] = ""
   edit$txt[start] = str
   edit$num.txt.change = edit$num.txt.change +1
   invisible(edit)
 }
 
-parse.xglue.blocks = function(txt) {
+parse.xglue.blocks = function(txt, newline="<<newline>>") {
   restore.point("parse.xglue.blocks")
   txt = sep.lines(txt)
   bdf = rmdtools::find.rmd.nested(txt) %>% filter(form=="block")
-
+  if (NROW(bdf)==0) return(NULL)
+  
   bdf = bdf %>%
     mutate(head = paste0(type," ", arg.str))
 
@@ -158,7 +206,7 @@ parse.xglue.blocks = function(txt) {
   }))
   bdf = do.call(cbind, list(bdf, arg.mat)) %>%
     mutate(collapse=remove.quotes(collapse)) %>%
-    mutate(collapse = gsub("<<newline>>","\n", collapse)) %>%
+    mutate(collapse = gsub(newline,"\n", collapse)) %>%
     mutate(collapse = ifelse(is.na(collapse),"",collapse))
 
   sep.rows = which(bdf$type=="sep")

@@ -9,7 +9,10 @@ xglue(
   envir = parent.frame(),
   open = "{",
   close = "}",
-  enclos = parent.frame()
+  pre.open = "<<",
+  pre.close = ">>",
+  enclos = parent.frame(),
+  newline = "<<newline>>"
 )
 }
 \arguments{
@@ -20,6 +23,10 @@ xglue(
 \item{open}{the opening string of glue whiskers}
 
 \item{close}{the closing string of glue whiskers}
+
+\item{pre.open}{the opening string of glue whiskers when pre compiling pre blocks}
+
+\item{pre.close}{the closing string of glue whiskers when pre compiling pre blocks}
 
 \item{enclos}{If envir is a list the enclosing environment.}
 }

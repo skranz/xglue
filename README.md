@@ -1,17 +1,14 @@
 # xglue
 
-Extend glue by collapse and with data blocks. Not yet well documented and work in progress.
+Extend glue. You can specify inside the template, operations like collapsing. Most importantly on can specify group_by operations on a data frame. Look at the vignette for examples. I created this package to facilitate the creation of customized latex tables.
 
 ## Installation
 
-The newest version will be hosted on my [https://skranz.r-universe.dev/ui#builds](r-universe). To install it you can type:
+The package is hosted on [https://skranz.r-universe.dev/ui#builds](r-universe). To install it run:
 
 ```r
-# Enable universe
 options(repos = c(
     skranz = 'https://skranz.r-universe.dev',
     CRAN = 'https://cloud.r-project.org'))
-
-# Install some packages
 install.packages('xglue')
 ```
