@@ -12,7 +12,8 @@ xglue(
   pre.open = "<<",
   pre.close = ">>",
   enclos = parent.frame(),
-  newline = "<<newline>>"
+  newline = "<<newline>>",
+  just.pre = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ xglue(
 \item{pre.close}{the closing string of glue whiskers when pre compiling pre blocks}
 
 \item{enclos}{If envir is a list the enclosing environment.}
+
+\item{just.pre}{Just compile the pre blocks and return the resulting template.}
 }
 \value{
 The glued text as a single character

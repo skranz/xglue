@@ -7,9 +7,10 @@
 #' @param pre.open the opening string of glue whiskers when pre compiling pre blocks
 #' @param pre.close the closing string of glue whiskers when pre compiling pre blocks
 #' @param enclos If envir is a list the enclosing environment.
+#' @param just.pre Just compile the pre blocks and return the resulting template.
 #' @returns The glued text as a single character
 #' @export
-xglue = function(txt, envir=parent.frame(),open="{", close="}",pre.open="<<", pre.close=">>", enclos=parent.frame(), newline = "<<newline>>") {
+xglue = function(txt, envir=parent.frame(),open="{", close="}",pre.open="<<", pre.close=">>", enclos=parent.frame(), newline = "<<newline>>", just.pre=FALSE) {
   restore.point("xglue")
   txt = sep.lines(txt)
 
@@ -26,6 +27,8 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}",pre.open="<<", pr
   # Compile pre blocks
   txt = xglue.pre(txt,envir, open=pre.open, close=pre.close, enclos=enclos,bdf=bdf, newline=newline)
 
+  if (just.pre) return(paste0(txt, collapse="\n"))
+  
   bdf = parse.xglue.blocks(txt, newline=newline)
   
   
@@ -69,15 +72,6 @@ xglue = function(txt, envir=parent.frame(),open="{", close="}",pre.open="<<", pr
   return(str)
 }
 
-#' Just compile pre blocks and return resulting text
-#'
-#' @param txt The template text on which xglue operations shall be performed
-#' @param envir Environment or list that contains objects whose value is spliced in. By default the environment from which xglue is called.
-#' @param open the opening string of the to be replaced glue whiskers in pre block
-#' @param close the closing string of the to be replaced glue whiskers in pre block
-#' @param enclos If envir is a list the enclosing environment.
-#' @returns The resulting text of the template were pre blocks have been replaced
-#' @export
 xglue.pre = function(txt, envir=parent.frame(),open="<<", close=">>", enclos=parent.frame(), newline="<<newline>>", bdf=NULL) {
   restore.point("xlgue.pre")
   if (is.null(bdf))
