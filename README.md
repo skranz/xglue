@@ -1,6 +1,6 @@
 # xglue
 
-Extend glue. You can specify inside the template, operations like collapsing. Most importantly on can specify group_by operations on a data frame. Look at the vignette for details and examples.
+Extend glue. You can specify inside the template, operations like collapsing. Most importantly on can specify group_by operations on a data frame. Look at the [vignette](https://skranz.github.io/xglue/articles/xglue.html) for details and examples.
 
 ## Installation
 
