@@ -11,6 +11,8 @@ xglue(
   close = "}",
   pre.open = "<<",
   pre.close = ">>",
+  block.open = "#<",
+  block.close = "#>",
   enclos = parent.frame(),
   newline = "<<newline>>",
   just.pre = FALSE
@@ -28,6 +30,10 @@ xglue(
 \item{pre.open}{the opening string of glue whiskers when pre compiling pre blocks}
 
 \item{pre.close}{the closing string of glue whiskers when pre compiling pre blocks}
+
+\item{block.open}{start of a block's header line, by default "#<"}
+
+\item{block.close}{start of a block's trailer line by default "#>".}
 
 \item{enclos}{If envir is a list the enclosing environment.}
 

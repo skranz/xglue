@@ -15,6 +15,18 @@ There existed Latex code for a similar table, but who wants to update a lot of n
 
 xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings.
 
+## Installation
+
+The package is hosted on [r-universe](https://skranz.r-universe.dev/ui#builds). To install it, just run:
+
+```r
+options(repos = c(
+    skranz = 'https://skranz.r-universe.dev',
+    CRAN = 'https://cloud.r-project.org'))
+install.packages('xglue')
+```
+
+
 ## Starting example: A template with collapse block
 
 Here is a simple example of an xglue template:
@@ -279,15 +291,4 @@ The resulting template looks as follows
 If you keep the default `just.pre=FALSE` then `xglue` just returns the results of compiling this template again.
 
 Addmittedly, templates with pre block may be not very easy to read, but still they can be helpful in certain instances.
-
-## Installation
-
-The package is hosted on [r-universe](https://skranz.r-universe.dev/ui#builds). To install it run:
-
-```r
-options(repos = c(
-    skranz = 'https://skranz.r-universe.dev',
-    CRAN = 'https://cloud.r-project.org'))
-install.packages('xglue')
-```
 

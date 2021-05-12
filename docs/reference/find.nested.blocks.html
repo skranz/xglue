@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Perform xglue operation on a template text — xglue • xglue</title>
+<title>Find nested blocks in a text — find.nested.blocks • xglue</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,9 @@
 
 
 
-<meta property="og:title" content="Perform xglue operation on a template text — xglue" />
-<meta property="og:description" content="Perform xglue operation on a template text" />
+<meta property="og:title" content="Find nested blocks in a text — find.nested.blocks" />
+<meta property="og:description" content="Blocks must start and end with separate header
+and trailer lines, respectively e.g." />
 
 
 
@@ -106,77 +107,39 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Perform xglue operation on a template text</h1>
+    <h1>Find nested blocks in a text</h1>
     
-    <div class="hidden name"><code>xglue.Rd</code></div>
+    <div class="hidden name"><code>find.nested.blocks.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Perform xglue operation on a template text</p>
+    <p>Blocks must start and end with separate header
+and trailer lines, respectively e.g.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>xglue</span>(
-  <span class='kw'>txt</span>,
-  envir = <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span>(),
-  open = <span class='st'>"{"</span>,
-  close = <span class='st'>"}"</span>,
-  pre.open = <span class='st'>"&lt;&lt;"</span>,
-  pre.close = <span class='st'>"&gt;&gt;"</span>,
-  block.open = <span class='st'>"#&lt;"</span>,
-  block.close = <span class='st'>"#&gt;"</span>,
-  enclos = <span class='fu'><a href='https://rdrr.io/r/base/sys.parent.html'>parent.frame</a></span>(),
-  newline = <span class='st'>"&lt;&lt;newline&gt;&gt;"</span>,
-  just.pre = <span class='fl'>FALSE</span>
-)</pre>
+    <pre class="usage"><span class='fu'>find.nested.blocks</span>(<span class='kw'>txt</span>, open = <span class='st'>"#&lt;"</span>, close = <span class='st'>"#&gt;"</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>txt</th>
-      <td><p>The template text on which xglue operations shall be performed</p></td>
-    </tr>
-    <tr>
-      <th>envir</th>
-      <td><p>Environment or list that contains objects whose value is spliced in. By default the environment from which xglue is called.</p></td>
+      <td><p>a character vector</p></td>
     </tr>
     <tr>
       <th>open</th>
-      <td><p>the opening string of glue whiskers</p></td>
-    </tr>
-    <tr>
-      <th>close</th>
-      <td><p>the closing string of glue whiskers</p></td>
-    </tr>
-    <tr>
-      <th>pre.open</th>
-      <td><p>the opening string of glue whiskers when pre compiling pre blocks</p></td>
-    </tr>
-    <tr>
-      <th>pre.close</th>
-      <td><p>the closing string of glue whiskers when pre compiling pre blocks</p></td>
-    </tr>
-    <tr>
-      <th>block.open</th>
       <td><p>start of a block's header line, by default "#&lt;"</p></td>
     </tr>
     <tr>
-      <th>block.close</th>
+      <th>close</th>
       <td><p>start of a block's trailer line by default "#&gt;".</p></td>
-    </tr>
-    <tr>
-      <th>enclos</th>
-      <td><p>If envir is a list the enclosing environment.</p></td>
-    </tr>
-    <tr>
-      <th>just.pre</th>
-      <td><p>Just compile the pre blocks and return the resulting template.</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>The glued text as a single character</p>
+    <p>#&lt; collapse ", "</p>
+<p>#&gt;</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

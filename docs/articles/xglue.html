@@ -80,6 +80,17 @@
 <p>I wrote xglue because for a scientific paper I needed to generate several customized Latex tables that each contained the results of many statistical tests. These were not standardized tables that could be quickly generated e.g. with <a href="https://cran.r-project.org/web/packages/stargazer/index.html">stargazer</a>. There existed Latex code for a similar table, but who wants to update a lot of numbers by hand? Building the table by pasting R strings together was also inconvenient. E.g. Latex has many backslashes \, which must be converted to double backslashes \\ inside R strings making things even harder to read.</p>
 <p>xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings.</p>
 </div>
+<div id="installation" class="section level2">
+<h2 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h2>
+<p>The package is hosted on <a href="https://skranz.r-universe.dev/ui#builds">r-universe</a>. To install it run:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit">
+<span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(repos = <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(
+    skranz = <span class="st">'https://skranz.r-universe.dev'</span>,
+    CRAN = <span class="st">'https://cloud.r-project.org'</span>))
+<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'xglue'</span>)
+</pre></div>
+</div>
 <div id="starting-example-a-template-with-collapse-block" class="section level2">
 <h2 class="hasAnchor">
 <a href="#starting-example-a-template-with-collapse-block" class="anchor"></a>Starting example: A template with collapse block</h2>
@@ -92,7 +103,7 @@
 
 Greetings, {myname}</code></pre>
 <p>The following code loads the template and then fills the fields <code>{name}</code> and <code>{myname}</code> with the values of the corresponding R variables.</p>
-<div class="sourceCode" id="cb2"><pre class="downlit">
+<div class="sourceCode" id="cb3"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw">xglue</span>)
 <span class="kw">tpl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"examples/hello_tpl.txt"</span>,package=<span class="st">"xglue"</span>))
 <span class="kw">names</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Anton"</span>,<span class="st">"Berta"</span>,<span class="st">"Charly"</span>)
@@ -119,7 +130,7 @@ Anton, Berta, Charly
 <h2 class="hasAnchor">
 <a href="#example-with-use-data-block" class="anchor"></a>Example with use data block</h2>
 <p>Consider the following subset of the <code>starwars</code> data set in the <code>dplyr</code> package.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit">
+<div class="sourceCode" id="cb8"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="https://dplyr.tidyverse.org">dplyr</a></span>)
 <span class="fu"><a href="https://rdrr.io/r/utils/data.html">data</a></span>(<span class="kw">starwars</span>)
 <span class="kw">dat</span> <span class="op">=</span> <span class="kw">starwars</span> <span class="op">%&gt;%</span>
@@ -197,7 +208,7 @@ The created markdown tables will look e.g. as follows
 #&gt;</code></pre>
 <p>generates the rows of each table.</p>
 <p>The function <code>fill</code> is a custom function that we specify before our call to <code>xglue</code>. Here is the code that then generates the markdown file from this template:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit">
+<div class="sourceCode" id="cb14"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw">xglue</span>)
 <span class="co"># A helper function used in the template</span>
 <span class="kw">fill</span> <span class="op">=</span> <span class="fu">function</span>(<span class="kw">str</span>=<span class="st">""</span>,<span class="kw">len</span>=<span class="fl">10</span>, <span class="kw">fill</span>=<span class="st">" "</span>) {
@@ -213,7 +224,7 @@ The created markdown tables will look e.g. as follows
 <h2 class="hasAnchor">
 <a href="#adapting-factors-using-the-forcats-packages" class="anchor"></a>Adapting factors using the forcats packages</h2>
 <p>A powerful complement to the xglue package is the <a href="https://cran.r-project.org/web/packages/forcats/index.html">forcats</a> that simplifies ordering and other manipluations of factor variables. Here is an example:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit">
+<div class="sourceCode" id="cb15"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="kw"><a href="http://forcats.tidyverse.org">forcats</a></span>)
 <span class="kw">dat</span> <span class="op">=</span> <span class="kw">starwars</span> <span class="op">%&gt;%</span>
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html">mutate</a></span>(
@@ -248,7 +259,7 @@ Number of total characters: {nrow(dat)}
 {md_table(.DATA, cols)}
 #&gt;</code></pre>
 <p>We can use it with the following code:</p>
-<div class="sourceCode" id="cb16"><pre class="downlit">
+<div class="sourceCode" id="cb17"><pre class="downlit">
 <span class="kw">md_table</span> <span class="op">=</span> <span class="fu">function</span>(<span class="kw">data</span>, <span class="kw">cols</span>) {
   <span class="kw">str</span> <span class="op">=</span> <span class="kw">knitr</span>::<span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html">kable</a></span>(<span class="kw">data</span>[,<span class="kw">cols</span>], <span class="st">"pipe"</span>)
   <span class="kw">str</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste0</a></span>(<span class="kw">str</span>, collapse=<span class="st">"\n"</span>)
@@ -291,7 +302,7 @@ Number of total characters: {nrow(dat)}
 #&gt;</code></pre>
 <p>The code in the <code>pre</code> blocks will be first compiled. These blocks can generate the code for the actual templates. When the pre blocks are compiled, all fields inside a <code>&lt;&lt;</code> and <code>&gt;&gt;</code> block (can be customized with the arguments <code>pre.open</code> and <code>pre.close</code> to xglue) will be replaced. Other blocks, like <code>collapse</code> blocks will also be run inside a pre block.</p>
 <p>We can just generate the resulting template by setting the argument <code>just.pre=TRUE</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit">
+<div class="sourceCode" id="cb19"><pre class="downlit">
 <span class="kw">pre.tpl</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/readLines.html">readLines</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/system.file.html">system.file</a></span>(<span class="st">"examples/starwars_pre_tpl.md"</span>,package=<span class="st">"xglue"</span>))
 <span class="kw">tpl</span> <span class="op">=</span> <span class="fu"><a href="../reference/xglue.html">xglue</a></span>(<span class="kw">pre.tpl</span>)
 </pre></div>
@@ -312,17 +323,6 @@ Number of total characters: {nrow(dat)}
 <p>If you keep the default <code>just.pre=FALSE</code> then <code>xglue</code> just returns the results of compiling this template again.</p>
 <p>Addmittedly, templates with pre block may be not very easy to read, but still they can be helpful in certain instances.</p>
 </div>
-</div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>The package is hosted on <a href="https://skranz.r-universe.dev/ui#builds">r-universe</a>. To install it run:</p>
-<div class="sourceCode" id="cb20"><pre class="downlit">
-<span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(repos = <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(
-    skranz = <span class="st">'https://skranz.r-universe.dev'</span>,
-    CRAN = <span class="st">'https://cloud.r-project.org'</span>))
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'xglue'</span>)
-</pre></div>
 </div>
   </div>
 
