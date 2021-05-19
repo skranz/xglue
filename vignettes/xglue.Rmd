@@ -10,10 +10,13 @@ library(xglue)
 
 ## Motivation for xglue
 
-I wrote xglue because for a scientific paper I needed to generate several customized Latex tables that each contained the results of many statistical tests. These were not standardized tables that could be quickly generated e.g. with [stargazer](https://cran.r-project.org/web/packages/stargazer/index.html). 
-There existed Latex code for a similar table, but who wants to update a lot of numbers by hand? Building the table by pasting R strings together was also inconvenient. E.g. Latex has many backslashes \\, which must be converted to double backslashes \\\\ inside R strings making things even harder to read.
+I wrote xglue because for a [recent working paper](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3848786), we needed to generate several customized Latex tables, like the following:
 
-xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings.
+![Latex Example Table](latex_example.PNG)
+The table is a bit longer and contains data from many statistical tests. While all the data can be easily merged into a data frame in R, it was not straightforward how to best generate this fairly customized Latex table in a reproducible workflow. Building the table by pasting R strings together was inconvenient. E.g. Latex has many backslashes \\, which must be converted to double backslashes \\\\ inside R strings making things even harder to read.
+
+
+xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings. The template for the table above can be found [here](https://github.com/skranz/xglue/blob/main/inst/examples/randomization_tests_tpl.tex). Simpler examples that explain the usage are below.
 
 ## Installation
 
@@ -195,7 +198,7 @@ dat = starwars %>%
 xglue(tpl)
 ```
 
-The result is shown [here](???).
+The result is shown [here](https://github.com/skranz/xglue/blob/main/inst/examples/starwars1.md).
 
 ## Using a function for more generic specification of table columns
 

@@ -1,0 +1,45 @@
+\begin{tabular}{l*{<<length(modes)>>}{c}}
+\hline\hline
+&
+#< collapse " & "
+ \multicolumn{1}{c}{(<<1:length(modes)>>)}
+#>
+\\
+&
+#< collapse " & "
+ \multicolumn{1}{c}{<<modes>>}
+#>
+\\
+
+\hline
+\hline
+
+#< use dat; group_by h
+Window half-width <<first(h)>>\\
+
+Proportion Significant&
+#< collapse " & "
+ <<round(theta,3)>><<p.stars(p.value)>>
+#>
+\\
+
+(p-value) &
+#< collapse " & "
+ (<<format(round(p.value,3), nsmall=3)>>)
+#>
+\\
+
+No. obs.&
+#< collapse " & "
+ <<round(obs)>>
+#>
+\\
+#< sep
+
+\hline
+
+#>
+#>
+
+\hline\hline
+\end{tabular}

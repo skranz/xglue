@@ -77,13 +77,14 @@
 <div id="motivation-for-xglue" class="section level2">
 <h2 class="hasAnchor">
 <a href="#motivation-for-xglue" class="anchor"></a>Motivation for xglue</h2>
-<p>I wrote xglue because for a scientific paper I needed to generate several customized Latex tables that each contained the results of many statistical tests. These were not standardized tables that could be quickly generated e.g. with <a href="https://cran.r-project.org/web/packages/stargazer/index.html">stargazer</a>. There existed Latex code for a similar table, but who wants to update a lot of numbers by hand? Building the table by pasting R strings together was also inconvenient. E.g. Latex has many backslashes \, which must be converted to double backslashes \\ inside R strings making things even harder to read.</p>
-<p>xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings.</p>
+<p>I wrote xglue because for a <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3848786">recent working paper</a>, we needed to generate several customized Latex tables, like the following:</p>
+<p><img src="latex_example.PNG" alt="Latex Example Table"> The table is a bit longer and contains data from many statistical tests. While all the data can be easily merged into a data frame in R, it was not straightforward how to best generate this fairly customized Latex table in a reproducible workflow. Building the table by pasting R strings together was inconvenient. E.g. Latex has many backslashes \, which must be converted to double backslashes \\ inside R strings making things even harder to read.</p>
+<p>xglue solves this problem by having templates as files that include placeholders and blocks that allow to collapse vectorized expressions or perform group_by operation on data frames to combine strings. The template for the table above can be found <a href="https://github.com/skranz/xglue/blob/main/inst/examples/randomization_tests_tpl.tex">here</a>. Simpler examples that explain the usage are below.</p>
 </div>
 <div id="installation" class="section level2">
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
-<p>The package is hosted on <a href="https://skranz.r-universe.dev/ui#builds">r-universe</a>. To install it run:</p>
+<p>The package is hosted on <a href="https://skranz.r-universe.dev/ui#builds">r-universe</a>. To install it, just run:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit">
 <span class="fu"><a href="https://rdrr.io/r/base/options.html">options</a></span>(repos = <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(
     skranz = <span class="st">'https://skranz.r-universe.dev'</span>,
@@ -241,7 +242,7 @@ The created markdown tables will look e.g. as follows
   <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html">arrange</a></span>(<span class="kw">species</span>, <span class="kw">name</span>)
 <span class="fu"><a href="../reference/xglue.html">xglue</a></span>(<span class="kw">tpl</span>)
 </pre></div>
-<p>The result is shown <a href="???">here</a>.</p>
+<p>The result is shown <a href="https://github.com/skranz/xglue/blob/main/inst/examples/starwars1.md">here</a>.</p>
 </div>
 <div id="using-a-function-for-more-generic-specification-of-table-columns" class="section level2">
 <h2 class="hasAnchor">
